@@ -24,6 +24,7 @@ DEFAULT equ 0 ; Midi autodetect, SID2 at $DF00
 KERBEROS equ 1 ; Datel Midi, SID2 at $D420
 EMU equ 2 ; Midi disabled, SID2 at $D420
 SIDSYMPHONY equ 3 ; Midi disabled, SID2 at $DE00
+MIDD01 equ 4 ; penfold42 MIDD01 user port midi
 ; -- - -- - -- - -- - -- - 
 ;;;DEVICE_CONFIG equ DEFAULT 		
 ; -- - -- - -- - -- - -- - 
@@ -247,6 +248,10 @@ ENABLE_MIDI_COMMANDS equ 0
 SID2 equ $DF00
 ENABLE_MIDI_COMMANDS equ 1
 	ENDIF
+	IF DEVICE_CONFIG=MIDD01
+SID2 equ $DF00
+ENABLE_MIDI_COMMANDS equ 1
+	ENDIF
 
 USE_DUMMY_MIDI_LIBRARY equ 0
 ;USE_DUMMY_MIDI_LIBRARY equ 1
@@ -256,7 +261,7 @@ USE_DUMMY_MIDI_LIBRARY equ 0
 DEBUG_DISABLE_VIDEO_MODE equ 0
 DEBUG_DISPLAY equ 0
 OFFSET_CONTROLLERS equ 0
-DEBUG_SHOW_MIDI equ 0
+DEBUG_SHOW_MIDI equ 1
 DEBUG_DISABLE_KEY_TIMER equ 0
 DEBUG_SHOW_PORTAMENTO equ 0
 
@@ -333,8 +338,8 @@ Startup:
 	lda #23
 	sta $d018
 
-	lda #193
-	sta 792
+;	lda #193
+;	sta 792
 	
 	; clear screen and show info
 ;	ldx #0
@@ -391,7 +396,7 @@ initSid:	sta $d400,x
 	lda #$E
 	sta hexDispColor
 
-	jsr disableRestoreKey
+;	jsr disableRestoreKey
 	
 	;=- =- =- =- =- =- =- =- =- =- =- =- =- =- 
 	;=- =- =- =- =- =- =- =- =- =- =- =- =- =- 
@@ -465,8 +470,8 @@ ramStart:
 	STA $D011
 
 	; Disable RESTORE key
-	lda #193
-	sta 792
+;	lda #193
+;	sta 792
 	
 	lda #0
 	sta BACK_COLOR

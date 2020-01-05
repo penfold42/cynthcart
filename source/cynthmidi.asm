@@ -59,6 +59,10 @@ midiDetect:	; TODO
 	IF DEVICE_CONFIG=KERBEROS
 	rts ; <--DETECT FUNCTION DISABLED
 	ENDIF
+	IF DEVICE_CONFIG=MIDD01
+	lda #5 ; MIDD01
+	rts ; <--DETECT FUNCTION DISABLED
+	ENDIF
 
 	sta midiInterfaceType
 testingLoop:
@@ -185,6 +189,15 @@ midiInit:
 	sta keyTestIndex
 	sta keyPressedIntern
 
+	; clear ringbuffer
+	lda #0
+	sta midiRingbufferReadIndex
+	sta midiRingbufferWriteIndex
+	
+	cpx #4
+	beq midiInit6526nmi
+
+midiInit6850:
 	; init addresses
 	lda midiControlOfs,x
 	sta midiControl
@@ -202,11 +215,6 @@ midiInit:
 	
 	; send reset code to MIDI adapter
 	jsr midiReset
-	
-	; clear ringbuffer
-	lda #0
-	sta midiRingbufferReadIndex
-	sta midiRingbufferWriteIndex
 	
 	; if the adapter uses NMI interrupts instead of IRQ
 	lda midiIrqType,x
@@ -231,6 +239,37 @@ midiSetIrq:
 	lda #$94
 	ora midiCr0Cr1,x
 	sta (midiControl),y
+	
+	cli
+	rts
+
+midiInit6526nmi:
+	lda midiControlOfs,x
+	sta midiControl
+	lda midiStatusOfs,x
+	sta midiStatus
+	lda midiTxOfs,x
+	sta midiTx
+	lda midiRxOfs,x
+	sta midiRx
+	lda #$dd
+	sta midiControl+1
+	sta midiStatus+1
+	sta midiTx+1
+	sta midiRx+1
+
+	lda #$00
+	sta $dd03	; DDRB to inputs
+
+	lda #$90
+	sta $dd0d	; enable /FLAG NMI ints
+	lda $dd0d	; clear any pending interrupt
+
+	; set NMI routine
+	lda #<midiNmi
+	sta $0318
+	lda #>midiNmi
+	sta $0319
 	
 	cli
 	rts
@@ -341,19 +380,36 @@ endColor:
 midiWrite:	rts  ; TODO		
 
 	; NMI handler
-midiNmi:	pha
+midiNmi:
+	pha
 	txa
 	pha
 	tya
 	pha
 	
+	lda #$7f
+	sta $dd0d
+	
 	; test if it was a NMI from the MIDI interface
 	ldy #0
+
+	IF DEVICE_CONFIG=MIDD01
+	inc $d020
+	lda $dd0d
+	and #$10
+	ELSE
 	lda (midiStatus),y
 	and #1
+	ENDIF
+
 	beq midiNmiEnd
+	inc $d021
 	jsr midiStore
-midiNmiEnd:	pla
+
+midiNmiEnd:
+	lda #$90
+	sta $dd0d
+	pla
 	tay
 	pla
 	tax
@@ -396,24 +452,24 @@ midiStore:
 	rts
 
 		; MC68B50 control register (relative to $de00)
-midiControlOfs:	.byte 0, 8, 4, 0
+midiControlOfs:	.byte 0, 8, 4, 0, 255
 
 		; MC68B50 status register
-midiStatusOfs:	.byte 2, 8, 6, 2
+midiStatusOfs:	.byte 2, 8, 6, 2, 255
 
 		; MC68B50 TX register
-midiTxOfs:	.byte 1, 9, 5, 1
+midiTxOfs:	.byte 1, 9, 5, 1, 1
 
 		; MC68B50 RX register offset
-midiRxOfs:	.byte 3, 9, 7, 3
+midiRxOfs:	.byte 3, 9, 7, 3, 1
 
 		; counter divide bits CR0 and CR1 for the MC68B50
 midiCr0Cr1:	
-	.byte 1, 1, 2, 1
+	.byte 1, 1, 2, 1, 255
 
 		; 1=IRQ, 0=NMI
 midiIrqType:	
-	.byte 1, 1, 1, 0
+	.byte 1, 1, 1, 0, 0
 
 	IF TEST_KEYBOARD=1
 	; keyboard test
