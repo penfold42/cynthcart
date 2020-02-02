@@ -394,7 +394,6 @@ midiNmi:
 	ldy #0
 
 	IF DEVICE_CONFIG=MIDD01
-	inc $d020
 	lda $dd0d
 	and #$10
 	ELSE
@@ -403,7 +402,6 @@ midiNmi:
 	ENDIF
 
 	beq midiNmiEnd
-	inc $d021
 	jsr midiStore
 
 midiNmiEnd:

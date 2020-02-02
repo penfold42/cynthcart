@@ -50,7 +50,8 @@ KERNEL_OBSOLETE equ 3 ; set up as replacement for 8k BASIC section of KERNEL (Th
 BASEADDR equ $8000
 	org BASEADDR
 	word Startup
-	word Startup
+;	word Startup
+	word $fe5e
 	; 5 byte cartridge startup code
 	byte $C3, $C2, $CD, $38, $30
 	ENDIF
@@ -222,7 +223,8 @@ copyCopier:
 	
 compressedData:
 	;incbin "..\bin\cynthcartRawCompressed.bin"
-	incbin "../bin/cynthcartRawCompressed.bin"
+;	incbin "../bin/cynthcartRawCompressed.bin"
+	incbin "../bin/cynthcart_midd01_RawCompressed.bin"
 	;incbin "cynthcart152.cmp"
 	;incbin "eprom.cmp" ; DEBUG!!
 

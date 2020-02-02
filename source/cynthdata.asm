@@ -191,6 +191,7 @@ lineOffsetM
 	byte $07
 
 debugOverlay
+	IF DEBUG_DISPLAY=1
  	byte 5,$82,"NOTE ONS",0
  	byte 9,$82,"NOTE OFFS",0
  	byte 10,$82,"                                    MIDI",0
@@ -201,6 +202,7 @@ debugOverlay
 	;byte 9,$8d,"FUNCTION-KEYS",$8F,"=OCTAVE",$8d,"  CTRL",$8F,"=CUSTOM-PATCH",0
  	byte 19,$82,"BUFFERS ETC",0
 	byte 255
+	ENDIF
 
 midiModeNames:
 	byte "        " ;0

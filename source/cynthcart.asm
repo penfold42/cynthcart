@@ -261,7 +261,7 @@ USE_DUMMY_MIDI_LIBRARY equ 0
 DEBUG_DISABLE_VIDEO_MODE equ 0
 DEBUG_DISPLAY equ 0
 OFFSET_CONTROLLERS equ 0
-DEBUG_SHOW_MIDI equ 1
+DEBUG_SHOW_MIDI equ 0
 DEBUG_DISABLE_KEY_TIMER equ 0
 DEBUG_SHOW_PORTAMENTO equ 0
 
@@ -544,6 +544,8 @@ clearBufferLoop
 	lda #$FF
 	jsr setMidiMode
 	;sta midiMode
+
+	lda $dd0d       ; clear any pending interrupt
 	
 	;===========================================
 	;===========================================
